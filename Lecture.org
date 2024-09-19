@@ -52,3 +52,135 @@ And in the loop:
         BLACK,
     );
 #+end_src
+
+* Now we want to move the player, let's get inputs
+#+begin_src
+fn get_input() -> Vec2 {
+    let mut x = 0.0;
+    let mut y = 0.0;
+
+    if is_key_down(KeyCode::A) {
+        x -= 1.0;
+    }
+
+    if is_key_down(KeyCode::D) {
+        x += 1.0;
+    }
+
+    if is_key_down(KeyCode::W) {
+        y -= 1.0;
+    }
+
+    if is_key_down(KeyCode::S) {
+        y += 1.0;
+    }
+
+    vec2(x, y)
+}
+#+end_src
+
+And in the beginning of the loop:
+#+begin_src
+  player.position += get_input();
+#+end_src
+
+Need to make `player` mutable!
+
+To get the same speed when moving diagonally:
+#+begin_src
+  vec2(x, y).clamp_length(0.0, 1.0)
+#+end_src
+
+* Let's add `speed` to the Player struct
+#+begin_src
+struct Player {
+    position: Vec2,
+    speed: f32,
+    hp: u32,
+}
+#+end_src
+
+#+begin_src
+  let mut player = Player {
+    ...
+    speed: 150.0,
+  };
+#+end_src
+
+#+begin_src
+  player.position += get_input() * player.speed * get_frame_time();
+#+end_src
+
+* Let's create a function that handles drawing the player!
+Requires "borrowing", probably the most famous feature of Rust:
+#+begin_src
+pub fn draw(player: &Player) {
+    draw_circle(
+        player.position.x,
+        player.position.y,
+        player.hp as f32 * 0.2,
+        BLACK,
+    );
+}
+#+end_src
+
+* Lets do that with the input handling too
+That requires a mutable borrow:
+#+begin_src
+pub fn update(player: &mut Player) {
+    player.position += get_input() * player.speed * get_frame_time();
+}
+#+end_src
+
+* Maybe we want to organize our code even better?
+Let's do two things:
+- Move the Player struct to its own module.
+- Associate the rendering and updating of the player more clearly with the Player struct.
+
+* The new player.rs
+#+begin_src
+use macroquad::prelude::*;
+
+pub struct Player {
+    pub position: Vec2,
+    pub speed: f32,
+    pub hp: u32,
+}
+
+impl Player {
+    pub fn draw(&self) {
+        draw_circle(
+            self.position.x,
+            self.position.y,
+            self.hp as f32 * 0.2,
+            BLACK,
+        );
+    }
+
+    pub fn update(&mut self, input: Vec2, dt: f32) {
+        self.position += input * self.speed;
+    }
+}
+#+end_src
+
+* Need to add some things in main.rs
+#+begin_src
+  mod player;
+#+end_src
+
+and
+
+#+begin_src
+  player::Player
+#+end_src
+
+which lets us write the loop like so:
+
+#+begin_src
+    loop {
+        clear_background(WHITE);
+        player.update(get_input(), get_frame_time());
+        player.draw();
+        next_frame().await;
+    }
+#+end_src
