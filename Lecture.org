@@ -1,0 +1,54 @@
+* Create project
+$ cargo new <name>
+
+* Edit Cargo.toml
+#+begin_src
+[dependencies]
+macroquad = "0.4"
+#+end_src
+
+* Run it
+$ cargo run
+
+* A minimal application (edit main.rs)
+#+begin_src
+use macroquad::prelude::*;
+
+#[macroquad::main("Lecture")]
+async fn main() {
+    loop {
+        clear_background(WHITE);
+        next_frame().await;
+    }
+}
+#+end_src
+
+* Why `async`?
+Makes an infinite loop like the one above work on all platforms, e.g. WASM.
+`next_frame()` gives the executing thread a chance to do other things.
+
+* Let's add a player (also known as a movable circle)
+#+begin_src
+    struct Player {
+        position: Vec2,
+        hp: u32,
+    }
+#+end_src
+
+In the beginning of the main function:
+#+begin_src
+    let player = Player {
+        position: vec2(screen_width() * 0.5, screen_height() * 0.5),
+        hp: 100,
+    };
+#+end_src
+
+And in the loop:
+#+begin_src
+    draw_circle(
+        player.position.x,
+        player.position.y,
+        player.hp as f32 * 0.2,
+        BLACK,
+    );
+#+end_src
