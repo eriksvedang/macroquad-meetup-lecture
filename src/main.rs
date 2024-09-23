@@ -17,14 +17,9 @@ async fn main() {
 
     loop {
         clear_background(WHITE);
-        player.update(get_input(), get_frame_time());
 
-        if is_mouse_button_pressed(MouseButton::Left) {
-            bullets.push(Bullet {
-                pos: player.position,
-                dir: 0.0,
-                speed: 200.0,
-            })
+        if let Some(bullet) = player.update(get_input(), get_frame_time()) {
+            bullets.push(bullet);
         }
 
         for bullet in &mut bullets {
