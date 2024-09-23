@@ -164,17 +164,18 @@ impl Player {
 #+end_src
 
 * Need to add some things in main.rs
+Add the module as a child module of the top crate of the project:
 #+begin_src
   mod player;
 #+end_src
 
-and
+And qualify the struct name:
 
 #+begin_src
   player::Player
 #+end_src
 
-which lets us write the loop like so:
+Which lets us write the loop like so:
 
 #+begin_src
     loop {
@@ -183,4 +184,48 @@ which lets us write the loop like so:
         player.draw();
         next_frame().await;
     }
+#+end_src
+* Perhaps we want to shoot bullets? Let's add a struct for that
+#+begin_src
+use macroquad::prelude::*;
+
+pub struct Bullet {
+    pub pos: Vec2,
+    pub dir: f32,
+    pub speed: f32,
+}
+#+end_src
+
+* Add the module to main.rs and use it
+
+#+begin_src
+  mod bullet;
+  use bullet::Bullet;
+#+end_src
+
+* Create a Vec to hold the bullets
+#+begin_src
+
+let mut bullets: Vec<Bullet> = Vec::new();
+#+end_src
+
+* Then check for mouse clicks, update and draw the bullets in the main loop
+#+begin_src
+        if is_mouse_button_pressed(MouseButton::Left) {
+            bullets.push(Bullet {
+                pos: player.position,
+                dir: 0.0,
+                speed: 100.0,
+            })
+        }
+
+        for bullet in &mut bullets {
+            bullet.pos += Vec2::from_angle(bullet.dir) * get_frame_time() * bullet.speed;
+            draw_circle(bullet.pos.x, bullet.pos.y, 10.0, RED);
+        }
+#+end_src
+
+* Want to remove bullets if they are outside the screen
+#+begin_src
+  bullets.retain(|bullet| bullet.pos.x < screen_width() - 50.0);
 #+end_src
