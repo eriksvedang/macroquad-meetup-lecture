@@ -5,3 +5,9 @@ pub struct Bullet {
     pub dir: f32,
     pub speed: f32,
 }
+
+impl Drop for Bullet {
+    fn drop(&mut self) {
+        println!("The bullet at {} was dropped.", self.pos);
+    }
+}

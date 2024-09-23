@@ -2,6 +2,7 @@ use macroquad::prelude::*;
 
 use crate::bullet::Bullet;
 
+#[derive(Clone, Copy, Debug)]
 pub struct Player {
     pub position: Vec2,
     pub speed: f32,
@@ -33,3 +34,13 @@ impl Player {
         }
     }
 }
+
+// impl Clone for Player {
+//     fn clone(&self) -> Self {
+//         Player {
+//             position: self.position, // no need to clone here, the type is Copy:able
+//             speed: self.speed,
+//             hp: self.hp,
+//         }
+//     }
+// }

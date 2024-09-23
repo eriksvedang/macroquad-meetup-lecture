@@ -256,3 +256,77 @@ if let Some(bullet) = player.update(get_input(), get_frame_time()) {
     bullets.push(bullet);
 }
 #+end_src
+
+* The bullet destruction needs to change a bit too
+#+begin_src
+  bullets.retain(|bullet| bullet.pos.distance(player.position) < 300.0);
+#+end_src
+
+* Maybe you don't trust that the bullet is actually deleted? We can implement `Drop`!
+#+begin_src
+impl Drop for Bullet {
+    fn drop(&mut self) {
+        println!("The bullet at {} was dropped.", self.pos);
+    }
+}
+#+end_src
+
+Note -- actually not needed for most types, the "drop glue" is always
+added and will recursively call the destructors on all fields of the
+struct.
+
+* Perhaps we want to create a second player, how do we copy the current one?
+#+begin_src
+  let mut player2 = player;
+#+end_src
+
+This does NOT work! See error message. We can't move the player to the
+player2 variable, and keep using the old variable.
+
+* Need to .clone()
+#+begin_src
+  let mut player2 = player.clone();
+  player2.speed = 50.0;
+#+end_src
+
+* Implementing it
+#+begin_src
+impl Clone for Player {
+    fn clone(&self) -> Self {
+        Player {
+            position: self.position, // N.B. No need to clone here, the type is Copy:able
+            speed: self.speed,
+            hp: self.hp,
+        }
+    }
+}
+#+end_src
+
+* But there's an easier way
+#+begin_src
+  #[derive(Clone)]
+  pub struct Player { ... }
+#+end_src
+
+* Since all of the members of player are Copy:able, we can make Player implement the Copy trait too
+#+begin_src
+  #[derive(Clone, Copy)]
+#+end_src
+
+* Now, we can use Player freely, and it will be copied for us
+#+begin_src
+  let mut player2 = player;
+#+end_src
+
+* Deriving traits is super handy, let's add Debug too
+#+begin_src
+  #[derive(Clone, Copy, Debug)]
+#+end_src
+
+* Now we can print debugging information for the players in the game window:
+#+begin_src
+draw_text(&format!("P1 {:?}", player), 10.0, 32.0, 16.0, BLACK);
+draw_text(&format!("P2 {:?}", player2), 10.0, 64.0, 16.0, BLACK);
+#+end_src
+
+* Combines macros (which write code for us) with the trait system (which is kind of like interfaces)
