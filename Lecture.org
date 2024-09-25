@@ -1,3 +1,6 @@
+* Why Rust? And why Rust for Game development?
+1. Memory safety (GC family of languages --vs-- C/C++)
+2. A nice modern language (especially if you're used to C/C++)
 * Create project
 $ cargo new <name>
 
